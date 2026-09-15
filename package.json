@@ -1,0 +1,31 @@
+{
+  "name": "qwen35-agent",
+  "version": "1.0.0",
+  "description": "Qwen3.5:9b özelleştirilmiş agent - Vision, Thinking, Tools, 256K Context",
+  "type": "module",
+  "bin": {
+    "qwen35": "./src/cli.ts",
+    "qwen35-terminal": "./terminal.js",
+    "qwen35-plus": "./terminal-plus.js"
+  },
+  "scripts": {
+    "dev": "bun run src/cli.ts",
+    "dev:web": "node web-ui/server.js",
+    "dev:terminal": "node terminal.js",
+    "dev:plus": "node terminal-plus.js",
+    "dev:tui": "bun run --conditions=browser tui-advanced.tsx",
+    "tui": "bun run --conditions=browser tui-advanced.tsx",
+    "webtui": "node tui-web.js",
+    "create": "ollama create qwen35-agent -f Modelfile",
+    "test": "bun run src/cli.ts --test"
+  },
+  "dependencies": {
+    "@opentui/core": "0.1.103",
+    "@opentui/solid": "0.1.103",
+    "blessed": "^0.1.81",
+    "docx": "^8.5.0",
+    "effect": "^3.12.0",
+    "jszip": "^3.10.1",
+    "solid-js": "1.9.10"
+  }
+}

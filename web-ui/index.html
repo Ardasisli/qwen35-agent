@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwen35-Agent • Desktop</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <!-- LEFT PANEL -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">Q</div>
+      <div>
+        <div class="brand-title">Qwen35-Agent</div>
+        <div class="brand-sub">qwen3.5:9b • Desktop</div>
+      </div>
+      <span class="dot online"></span>
+    </div>
+    <button class="btn primary" id="newChatBtn2" style="width:100%;justify-content:center;gap:8px">➕ New Chat</button>
+
+    <!-- Model Selector -->
+    <div class="panel">
+      <div class="panel-title">🧠 Model</div>
+      <select id="modelSelect" class="select">
+        <option value="qwen35-agent">qwen35-agent (custom) ★</option>
+        <option value="qwen3.5:9b">qwen3.5:9b (6.6GB)</option>
+        <option value="qwen2.5-coder:7b">qwen2.5-coder:7b (4.7GB)</option>
+        <option value="llama3.1:8b-instruct-q4_K_M">llama3.1:8b</option>
+        <option value="dolphin-llama3:8b">dolphin-llama3:8b</option>
+      </select>
+      <div class="model-info" id="modelInfo">256K • Vision • Thinking • Tools</div>
+    </div>
+
+    <!-- Kontroller — profesyonel, kompakt -->
+    <div class="panel compact">
+      <div class="panel-title">Kontroller <span class="panel-count">· hassas ayar</span></div>
+      <span id="thinkBadge" hidden></span><span id="smithBadge" hidden></span>
+      <div class="control-list">
+        <div class="control-item">
+          <div class="control-info">
+            <span class="control-name">Thinking</span>
+            <span class="control-desc">Deep reasoning</span>
+          </div>
+          <label class="switch"><input type="checkbox" id="thinkToggle"><span class="slider"></span></label>
+        </div>
+        <div class="control-item">
+          <div class="control-info">
+            <span class="control-name">Streaming</span>
+            <span class="control-desc">Live stream</span>
+          </div>
+          <label class="switch"><input type="checkbox" id="streamToggle" checked><span class="slider"></span></label>
+        </div>
+        <div class="control-item">
+          <div class="control-info">
+            <span class="control-name">Smith</span>
+            <span class="control-desc">Autonomous 3-phase</span>
+          </div>
+          <label class="switch"><input type="checkbox" id="smithToggle" checked><span class="slider"></span></label>
+        </div>
+      </div>
+      <div class="control-row compact">
+        <label>Context</label>
+        <select id="ctxSelect" class="select small">
+          <option value="8192">8K</option>
+          <option value="32768" selected>32K</option>
+          <option value="65536">64K</option>
+          <option value="131072">128K</option>
+          <option value="262144">256K</option>
+        </select>
+      </div>
+      <div class="control-row compact">
+        <label>Temperature</label>
+        <div class="range-wrap"><input type="range" id="tempRange" min="0" max="2" step="0.1" value="0.7"><span id="tempVal">0.7</span></div>
+      </div>
+    </div>
+
+    <!-- Context — minimal -->
+    <div class="panel compact">
+      <div class="panel-title">Context <span class="panel-count" id="ctxPct">0%</span></div>
+      <div class="progress-bar"><div id="ctxFill" class="progress-fill" style="width: 0%"></div></div>
+      <div class="progress-meta"><span id="ctxUsed">0</span> / <span id="ctxTotal">32768</span> <span class="muted">·</span> <span id="ctxSub">0 mesaj</span></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn small ghost" id="clearBtn" style="flex:1">Clear</button>
+        <button class="btn small ghost" id="exportBtn">Export</button>
+        <button class="btn small ghost" id="importBtn">Import</button>
+        <input type="file" id="importFile" accept=".json" hidden>
+      </div>
+    </div>
+
+    <!-- Skills — chip grid, tik yok -->
+    <div class="panel compact">
+      <div class="panel-title">Skills <span class="panel-count">20 araç</span></div>
+      <div class="tools-grid">
+        <label class="tool-chip"><input type="checkbox" id="toolWeb" checked hidden><span class="chip-dot"></span> Web</label>
+        <label class="tool-chip"><input type="checkbox" id="toolFile" checked hidden><span class="chip-dot"></span> Files</label>
+        <label class="tool-chip"><input type="checkbox" id="toolCode" checked hidden><span class="chip-dot"></span> Code</label>
+        <label class="tool-chip"><input type="checkbox" id="toolVision" checked hidden><span class="chip-dot"></span> Vision</label>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <span class="tool-chip" style="background:rgba(124,92,253,.12);border-color:rgba(124,92,253,.2);color:#7c5cfd;cursor:default"><span class="chip-dot" style="background:#7c5cfd"></span> Book ✍️</span>
+        <span style="font-size:11px;color:var(--muted2);align-self:center">always active · persistent</span>
+      </div>
+      <div class="tool-hint">Selected skills are provided to the model — Book tools always active</div>
+    </div>
+
+    <!-- Book — kalıcı durum -->
+    <div class="panel compact">
+      <div class="panel-title">📚 Book <span class="panel-count">auto layout</span></div>
+      <div id="bookStatus" style="font-size:11.5px;color:var(--muted);line-height:1.5;padding:6px 0">No books yet<br><span style="color:var(--muted2)">Say "write book" — page layout, contents, numbers auto</span></div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn small ghost" style="flex:1" onclick="(async()=>{const r=await fetch('/api/book-status',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});const j=await r.json();const el=document.getElementById('bookStatus');if(j.kitaplar&&j.kitaplar.length) el.innerHTML=j.kitaplar.map(k=>`📖 <b>${k.baslik}</b> — ${k.tamam} · ${k.siradaki}`).join('<br>'); else el.textContent=j.mesaj||'No books yet'})()">View Status</button>
+        <button class="btn small ghost" onclick="window.open('file:///C:/Users/excalibur/Desktop/Booklar','_blank')">Folder</button>
+      </div>
+    </div>
+
+    <!-- Image — ChatGPT tarzı, kompakt -->
+    <div class="panel compact">
+      <div class="panel-title">Image</div>
+      <div id="dropZone" class="upload-area">
+        <div class="upload-icon">◇</div>
+        <div class="upload-text"><b>Add or drag</b><span>PNG, JPG, WEBP — click</span></div>
+        <span class="upload-plus">＋</span>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+      </div>
+      <div id="previewWrap" class="preview-wrap hidden">
+        <img id="previewImg" src="">
+        <div class="preview-meta"><span id="previewName" class="preview-name"></span><button id="removeImg" class="btn small ghost">Remove</button></div>
+      </div>
+    </div>
+
+    <!-- File — genişletilmiş -->
+    <div class="panel compact">
+      <div class="panel-title">File</div>
+      <input id="fileName" class="input" placeholder="file.py">
+      <textarea id="fileContent" class="textarea" placeholder="Content..." style="min-height:160px;height:160px;resize:vertical"></textarea>
+      <div class="row">
+        <button id="saveFileBtn" class="btn small primary" style="flex:1">Save</button>
+        <button id="loadFileBtn" class="btn small ghost" style="flex:1">Load</button>
+      </div>
+      <div id="fileStatus" class="file-status"></div>
+    </div>
+
+    <div class="sidebar-foot">Local • Ollama 127.0.0.1:11434 • <span id="connStatus" class="conn">● Connected</span></div>
+  </aside>
+
+  <!-- CENTER - CHAT -->
+  <main class="main">
+    <div class="chat-header">
+      <div>
+        <div class="chat-title">Chat</div>
+        <div class="chat-subtitle">Local • Private • Fast • <span id="headerModel">qwen35-agent</span></div>
+      </div>
+      <div class="header-actions">
+        <button class="btn small ghost" id="headerNewChatBtn" style="padding:6px 10px;font-size:12px">➕ New Chat</button>
+        <span class="live-dot"><span class="dot online small"></span> Live</span>
+      </div>
+    </div>
+    <div id="chat" class="chat">
+      <div class="welcome">
+        <div class="welcome-icon">✦</div>
+        <h2>Welcome to Qwen35-Agent</h2>
+        <p>Your local and private AI assistant powered by<br>Vision, Thinking, 256K Context and Tools.</p>
+        <div class="chips">
+          <button class="chip" data-prompt="Hello! Introduce yourself in 2 sentences">👋 Introduce</button>
+          <button class="chip" data-prompt="/think There are 17 sheep on a farm, all but 9 die, how many remain? Solve step by step">🧮 Logic puzzle</button>
+          <button class="chip" data-prompt="Write binary search in Python with tests">💻 Write code</button>
+          <button class="chip" data-prompt="Analyze this image" data-need-image="1">🖼️ Analyze image</button>
+          <button class="chip" data-prompt="Draw a dragon soaring over mountains at sunset, highly detailed and cinematic">🎨 Generate image</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="composer" style="position:relative">
+      <div id="atPopup" class="at-popup hidden">
+        <div class="at-header">
+          <button id="atBack" class="btn small ghost" title="Geri">←</button>
+          <span id="atPath" class="at-path">Desktop</span>
+          <button id="atClose" class="btn small ghost">✕</button>
+        </div>
+        <div id="atList" class="at-list"></div>
+        <div class="at-footer">
+          <span>↑↓ seç • Enter aç/ekle • Esc kapat • Çift tık klasör</span>
+          <span id="atHint" class="at-hint"></span>
+        </div>
+      </div>
+      <div id="attachBar" class="attach-bar hidden">
+        <span id="attachName">📎 foto.jpg</span> <button id="clearAttach">✕</button>
+      </div>
+      <div id="fileChips" class="file-chips hidden"></div>
+      <div class="input-row">
+        <textarea id="prompt" class="prompt" placeholder="Write a message... (@ to select file • /think to reason)" rows="1"></textarea>
+        <button id="stopBtn" class="btn danger" style="display:none;width:44px;height:44px;border-radius:12px;font-size:16px;flex-shrink:0" title="Durdur (Esc)">⏹</button>
+        <button id="sendBtn" class="btn send">▶</button>
+      </div>
+      <div class="composer-foot">
+        <span class="hint">Enter: send • Shift+Enter: new line • @ select file • Drag & drop image</span>
+        <span class="hint" id="charCount"></span>
+      </div>
+    </div>
+  </main>
+
+  <!-- RIGHT - History & Details -->
+  <aside class="rightbar">
+    <div class="panel">
+      <div class="panel-title" style="display:flex;align-items:center;gap:8px">💬 Sohbetler <button class="btn small primary" id="newChatBtn" style="margin-left:auto;padding:4px 10px;font-size:11px">➕ Yeni</button></div>
+      <div id="conversationList" class="conversation-list" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow:auto"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">📝 Message History</div>
+      <div id="history" class="history"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">🔍 Last Action</div>
+      <div id="lastMeta" class="meta">No messages yet</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">📂 Hızlı Filelar</div>
+      <div id="quickFiles" class="quick-files">
+        <div class="empty">No files created yet</div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
