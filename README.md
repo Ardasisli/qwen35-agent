@@ -75,8 +75,24 @@ bun run src/cli.ts --think "Continue C:\Users\excalibur\Desktop\Kitaplar\Secrets
 - Persistent under `Desktop/Kitaplar/` — continue in new chat via `book_extend` with directory path
 - Sanitization: strips `<think>`, duplicate paragraphs, loops
 
-### Web UI
+### Web UI & Terminal — One Click
+
+This project has **both** a modern Web UI and a powerful Terminal. Just double-click a `.bat` file — no command line needed.
+
+| File | What it does | How to run |
+|------|--------------|------------|
+| **`start-web.bat`** | Starts the **Web Site** at `http://localhost:5173` — Chat, Vision drag & drop, Controls (Thinking/Streaming/Smith), 20 Tools + Book always active, Context bar, file chips (`@`) | **Double-click** `start-web.bat` → browser opens automatically |
+| **`run.bat`** | Starts the **Terminal** (classic CLI) — `bun run src/cli.ts` | Double-click `run.bat` |
+| **`run-plus.bat`** | Starts **Terminal Plus** — enhanced terminal with extra features (`terminal-plus.js`) | Double-click `run-plus.bat` |
+| **`terminal.js` / `terminal-plus.js`** | Underlying Node terminals (used by the `.bat` files) | `node terminal.js` / `node terminal-plus.js` |
+| **`tui-advanced.tsx`** | Advanced TUI (Blessed + OpenTUI) | `bun run tui` |
+
+**Web UI quick start:**
 ```bash
+# Option 1: double-click (Windows)
+start-web.bat
+
+# Option 2: command line
 bun run web-ui/server.js
 # open http://localhost:5173
 ```
@@ -84,6 +100,16 @@ bun run web-ui/server.js
 - Controls: Thinking / Streaming / Smith (autonomous 3-phase)
 - Tools: Web / Files / Code / Vision + Book (always active)
 - Context bar, file chips (`@` to select files), book status
+
+**Terminal quick start:**
+```bash
+# Option 1: double-click
+run.bat          # or run-plus.bat for Plus version
+
+# Option 2: command line
+bun run src/cli.ts "Hello"
+node terminal.js
+```
 
 ## 🧠 Code Usage
 
