@@ -1,123 +1,173 @@
 # Qwen35-Agent
 
-**Qwen3.5:9b** üzerine kurulu özelleştirilmiş agent. Model ne yapabiliyorsa agent da yapabilir.
+**Custom agent built on Qwen3.5:9b** — unlocks everything the model can do.
 
-## ✨ Özellikler (Modelin tüm yetenekleri)
+> Local • Private • Fast • 256K Context • Vision • Tools
 
-| Yetenek | Açıklama | Nasıl kullanılır |
-|---------|----------|------------------|
-| **Vision** | Fotoğraf, ekran görüntüsü, diyagram anlama | `--vision image.png "ne var?"` |
-| **Thinking** | Adım adım düşünme (matematik/kod için) | `--think` |
-| **256K Context** | 1 kitap kadar uzun doküman | `--ctx 131072` |
-| **Tools** | Dosya okuma/yazma, kod çalıştırma | Otomatik |
-| **201 Dil** | Türkçe dahil | Otomatik |
-| **Kod** | 20+ dilde kod yazma | `--code` |
-| **Matematik** | AIME/HMMT seviyesi | `--math` |
+## ✨ Features
 
-## 🚀 Kurulum
+| Capability | Description | Usage |
+|---------|-------------|-------|
+| **Vision** | Understand photos, screenshots, diagrams | `--vision image.png "what is this?"` |
+| **Thinking** | Step-by-step reasoning (math/code) | `--think` |
+| **256K Context** | Up to 1 book-length document | `--ctx 131072` |
+| **Tools** | File I/O, code execution, web search | Automatic |
+| **201 Languages** | Including Turkish & English | Automatic |
+| **Code** | 20+ languages | `--code` |
+| **Math** | AIME/HMMT level | `--math` |
+| **Book Writing** | Professional A5 layout, TOC, pagination, persistent | `write book` |
+| **Image Generation** | Pollinations.ai | `generate image` |
+
+## 🚀 Installation
 
 ```bash
-# 1. Model zaten sende var (6.6GB)
-ollama list  # qwen3.5:9b görünmeli
+# 1. Model should be present (6.6GB)
+ollama list  # qwen3.5:9b should appear
 
-# 2. Özelleştirilmiş agent'i oluştur (Modelfile'dan)
-cd packages/opencode/qwen35-agent
+# 2. Create custom agent from Modelfile
 ollama create qwen35-agent -f Modelfile
 
-# 3. Test et
-ollama run qwen35-agent "Merhaba"
-# veya CLI ile:
-bun run src/cli.ts "Merhaba"
+# 3. Test
+ollama run qwen35-agent "Hello"
+# or via CLI:
+bun run src/cli.ts "Hello"
 ```
 
-## 💻 Kullanım
+## 💻 Usage
 
-### Basit sohbet (hızlı)
+### Simple chat
 ```bash
-bun run src/cli.ts "Türkiye'nin başkenti neresi?"
+bun run src/cli.ts "What is the capital of Turkey?"
 ```
 
-### Thinking modu (zor sorular)
+### Thinking mode (hard questions)
 ```bash
-bun run src/cli.ts --think "Bir çiftlikte 17 koyun var, 9'u hariç hepsi öldü kaç kaldı? Adım adım çöz"
+bun run src/cli.ts --think "There are 17 sheep, all but 9 die, how many remain? Solve step by step"
 ```
 
-### Vision (görsel anlama)
+### Vision
 ```bash
-# Ekran görüntüsü analiz
-bun run src/cli.ts --vision ./hata.png "bu hatayı açıkla ve çözümü yaz"
-# Fotoğraf analiz
-bun run src/cli.ts --vision ./diyagram.jpg "bu diyagramı açıkla"
+bun run src/cli.ts --vision ./error.png "explain this error and fix it"
 ```
 
-### Kod yazma
+### Code
 ```bash
-bun run src/cli.ts --code "Python ile binary search yaz, testleri de ekle"
-bun run src/cli.ts --code "TypeScript ile todo app, localStorage ile"
+bun run src/cli.ts --code "Write binary search in Python with tests"
 ```
 
-### Matematik
+### Math
 ```bash
-bun run src/cli.ts --math "x^2 + 5x + 6 = 0 denklemini çöz, boxed ile ver"
-bun run src/cli.ts --math "3x + 2y = 12, 5x - y = 7 sistemini çöz"
+bun run src/cli.ts --math "Solve x^2 + 5x + 6 = 0, give boxed answer"
 ```
 
-### Uzun Context
+### Book Writing — Professional Layout
 ```bash
-bun run src/cli.ts --ctx 131072 "10 dosyalık projemi analiz et: ..."
-```
+# Create and auto-write a 4-page children's book
+bun run src/cli.ts "write a children's book 'Secrets of Rome' about adventure in Rome, 4 pages"
 
-## 🧠 Koddan Kullanım
+# Continue in a new chat via directory
+bun run src/cli.ts --think "Continue C:\Users\excalibur\Desktop\Kitaplar\Secrets-of-Rome, add 2 more pages"
+```
+**Book features:**
+- A5 professional layout (20mm/18mm/15mm margins, page numbers bottom-center)
+- Cover, colophon, table of contents with dot leaders
+- Chapters start on right page, justified, hyphenation, drop-cap
+- Persistent under `Desktop/Kitaplar/` — continue in new chat via `book_extend` with directory path
+- Sanitization: strips `<think>`, duplicate paragraphs, loops
+
+### Web UI
+```bash
+bun run web-ui/server.js
+# open http://localhost:5173
+```
+- Chat with Vision drag & drop
+- Controls: Thinking / Streaming / Smith (autonomous 3-phase)
+- Tools: Web / Files / Code / Vision + Book (always active)
+- Context bar, file chips (`@` to select files), book status
+
+## 🧠 Code Usage
 
 ```typescript
 import { Qwen35Agent } from "./src/agent.ts"
 
-const agent = new Qwen35Agent({ model: "qwen3.5:9b" })
+const agent = new Qwen35Agent({ model: "qwen35-agent" })
 
-// Basit chat
-await agent.chat({ messages: [{ role: "user", content: "Merhaba" }] })
+// Simple chat
+await agent.chat({ messages: [{ role: "user", content: "Hello" }] })
 
-// Thinking ile matematik
-await agent.math("2x + 3 = 11, x nedir?")
-
-// Kod
-await agent.code("Rust ile fibonacci")
+// Math with thinking
+await agent.math("2x + 3 = 11, find x")
 
 // Vision
-await agent.vision("./image.png", "Bu resimde ne var?")
+await agent.vision("./image.png", "What is in this image?")
 
-// Long context
-await agent.longContext([doc1, doc2], "Bu dokümanlar ne hakkında?")
-
-// Tool calling ile
-import { allTools } from "./src/tools.ts"
+// Tool calling
+import { allToolsWithBook } from "./src/tools.ts"
 await agent.chat({
-  messages: [{ role: "user", content: "src/index.ts dosyasını oku ve özetle" }],
-  tools: allTools,
+  messages: [{ role: "user", content: "read src/index.ts and summarize" }],
+  tools: allToolsWithBook,
   think: true
 })
 ```
 
-## 🔧 Modelfile Özellikleri
+## 🔧 Available Tools (all English)
 
-- `temperature 0.7`, `top_p 0.9` - dengeli yaratıcılık
-- `num_ctx 131072` - 128K varsayılan context
-- Türkçe system prompt
-- Tool calling aktif
+| Tool | Description |
+|------|-------------|
+| `write_file` | Write content to file (auto Desktop) |
+| `read_file` | Read file with offset/limit |
+| `list_files` | List directory |
+| `edit_file` | Edit by exact string replace |
+| `delete_file` | Delete file/dir |
+| `create_directory` | Create directory |
+| `search_files` | Grep search |
+| `move_file` | Move/rename |
+| `run_python` | Execute Python |
+| `run_javascript` | Execute JS via Node |
+| `run_bash` | Execute shell |
+| `run_sandbox` | Test in isolated temp dir |
+| `web_search` | DuckDuckGo search |
+| `fetch_url` | Fetch URL |
+| `get_system_info` | System info |
+| `generate_image` | Generate image via Pollinations.ai |
+| `book_create` | CREATE NEW BOOK |
+| `book_status` | GET BOOK STATUS (supports directory) |
+| `book_add_chapter` | ADD CHAPTER |
+| `book_write` | WRITE BOOK / CONTINUE |
+| `book_generate` | GENERATE BOOK (html/pdf/docx/epub) |
+| `book_extend` | EXTEND BOOK - add pages from directory |
 
-## 📊 qwen2.5-coder:7b vs qwen35-agent karşılaştırma
+All book tools support **full directory path** for continuing in a new chat:
+```js
+book_extend(kitapYolu="C:\\Users\\excalibur\\Desktop\\Kitaplar\\MyBook", ekSayfa=2)
+```
 
-| | qwen2.5-coder:7b | qwen35-agent (qwen3.5:9b) |
+## 📖 Book System
+
+Books are stored at `C:\Users\excalibur\Desktop\Kitaplar\<slug>\`
+- `kitap.json` — metadata
+- `bolumler/bolum-01.md` — chapters
+- `kitap.html` — professional print-ready A5
+
+In a new chat, just give the directory:
+> `C:\Users\excalibur\Desktop\Kitaplar\Secrets-of-Rome add 2 pages from where we left off`
+
+## ⚙️ Modelfile
+
+- `temperature 0.7`, `top_p 0.9`
+- `num_ctx 131072` (128K default, up to 256K)
+- English system prompt, tool calling enabled
+
+## 📊 Comparison
+
+| | qwen2.5-coder:7b | qwen35-agent |
 |---|---|---|
 | Vision | ❌ | ✅ Natively multimodal |
 | Thinking | ❌ | ✅ Toggleable |
 | Context | 32K | 256K |
-| Matematik | Orta | Çok iyi (AIME %91) |
-| Dil | İyi | 201 dil |
+| Math | Medium | Excellent (AIME 91%) |
+| Languages | Good | 201 |
 
-## ⚡ İpuçları
+## 📄 License
 
-- Basit sorular: `--no-think` ile hızlı
-- Zor sorular: `--think` ile derin
-- Görsel varsa: mutlaka `--vision` kullan
-- Kod için: `--code` modu otomatik thinking açar
+MIT — see `Modelfile` for Ollama usage.

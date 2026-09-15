@@ -3,5 +3,10 @@ dist/
 *.log
 .DS_Store
 tmp_resp.json
-bun.lock
+web-ui/tmp_resp.json
+.env
+.env.local
 Kitaplar/
+qwen-memory.json
+*.tmp
+.DS_Store
